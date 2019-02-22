@@ -71,17 +71,19 @@ coned_lastmonth = float(driver.find_element_by_xpath('//*[@id="overview"]'
 driver.quit()
 ###
 
+sum_total = sum([nat_grid_lastmonth, coned_lastmonth, optimum_lastmonth])
+
 # Format an email:
 yag = yagmail.SMTP(mygmailusername, mygmailpassword)
 to = 'santa@someone.com'
 to2 = 'cinemarob1@gmail.com'
 subject = 'Utility Bill Scraper — Report'
 body = 'This is what utilities cost this past month:\n'
-body += f'\nNational Grid: <b>${nat_grid_lastmonth}</b>.\n\n'
-body += f'Optimum: <b>${optimum_lastmonth}</b>.\n\n'
+body += f'\nNational Grid: <b>${nat_grid_lastmonth}</b>.\n'
+body += f'Optimum: <b>${optimum_lastmonth}</b>.\n'
 body += f'Coned: <b>${coned_lastmonth}</b>.\n\n'
-sum_total = sum([nat_grid_lastmonth, coned_lastmonth, optimum_lastmonth])
-body += f'Total: <b>${sum_total}</b>\n\n'
-body += f'Split three ways: ${sum_total/3}\n\n'
+body += '***********'
+body += f'Total: <b>${sum_total}</b>\n'
+body += f'(Split three ways: <b>${sum_total/3})</b>\n\n'
 yag.send(to = [to, to2], subject = subject, contents = body)
 
