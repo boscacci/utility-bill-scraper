@@ -1,14 +1,10 @@
-#!/Users/rob/.local/share/virtualenvs/utility-bill-scraper-Nrnyp36I/bin/python3
-
 from selenium import webdriver
-from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-import time, os, yagmail
-from creds import *
+import yagmail
 
+from creds import *
 """
-In a file called creds you will need to define:
+In a .py module called creds you will need to set these vars:
 mygmailusername = 
 mygmailpassword = 
 optimum_username = 
@@ -17,24 +13,26 @@ national_grid_username =
 national_grid_password = 
 coned_username = 
 coned_password = 
+coned_mfa_code = 
 """
 
 driver = webdriver.Chrome()
 
-# OPTIMUM
+# OPTIMUM:
 driver.get("https://www.optimum.net/login")
 login_field = driver.find_element_by_id("loginPageUsername")
 pword_field = driver.find_element_by_id("loginPagePassword")
 login_field.send_keys(optimum_username)
 pword_field.send_keys(optimum_password)
 pword_field.send_keys(Keys.RETURN)
-driver.implicitly_wait(8)
+pword_field.send_keys(Keys.RETURN)
+driver.implicitly_wait(5)
 
-optimum_balance = float(driver.find_element_by_xpath("//*[@id='site-wrapper']/section[1]"
-                             "/section[3]/div/div/div[2]/div/section/div"
-                             "/div[2]/div[1]/div[1]/div[2]/span[1]"
-                             "/span[2]").text[1:])
-# NATIONAL GRID
+optimum_lastmonth = float(driver.find_element_by_xpath('//*[@id="site-wrapper"]/'
+	'section[1]/section[3]/div/div/div[2]/div/section/div/div[2]/div[1]/div[1]'
+	'/div[1]/span[1]/span[3]').text[1:])
+
+# NATIONAL GRID:
 driver.get("https://online.nationalgridus.com/login/"
            "LoginActivate?applicurl=aHR0cHM6Ly9vbmxpbm"
            "UubmF0aW9uYWxncmlkdXMuY29tL2VzZXJ2aWNlX2VudQ==&auth_method=0")
@@ -53,19 +51,31 @@ driver.implicitly_wait(8)
 driver.switch_to_frame("_sweclient")
 driver.switch_to_frame("_sweview")
 
-nat_grid_balance = float(driver.find_element(By.ID, 's_4_1_15_0').text[1:])
+nat_grid_lastmonth = float(driver.find_element_by_id('s_4_1_16_0').text[1:])
 
+# CONED:
+driver.get("https://www.coned.com/en/login")
+login_field = driver.find_element_by_id("form-login-email")
+pword_field = driver.find_element_by_id("form-login-password")
+login_field.send_keys(coned_username)
+pword_field.send_keys(coned_password)
+pword_field.send_keys(Keys.RETURN)
+driver.implicitly_wait(5)
+mfa_field = driver.find_element_by_id("form-login-mfa-code")
+mfa_field.send_keys(coned_mfa_code)
+mfa_field.send_keys(Keys.RETURN)
+coned_lastmonth = float(driver.find_element_by_xpath('//*[@id="overview"]'
+	'/div[1]/div[1]/div[1]/p/b').text[1:])
 driver.quit()
 
+# Format an email:
 yag = yagmail.SMTP(mygmailusername, mygmailpassword)
-
 to = 'santa@someone.com'
 to2 = 'cinemarob1@gmail.com'
-subject = 'Utility Time'
-body = f'Your national grid balance is {nat_grid_balance} \n\n'
-body += f'Your optimum balance is {optimum_balance} \n\n'
-
+subject = 'Utility Bill Scraper — Report'
+body = 'This is what utilities cost this past month:\n'
+body += f'\nNational Grid: <b>${nat_grid_lastmonth}</b>.\n\n'
+body += f'Optimum: <b>${optimum_lastmonth}</b>.\n\n'
+body += f'Coned: <b>${coned_lastmonth}</b>.\n\n'
 yag.send(to = [to, to2], subject = subject, contents = body)
-
-
 
