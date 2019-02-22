@@ -80,5 +80,8 @@ body = 'This is what utilities cost this past month:\n'
 body += f'\nNational Grid: <b>${nat_grid_lastmonth}</b>.\n\n'
 body += f'Optimum: <b>${optimum_lastmonth}</b>.\n\n'
 body += f'Coned: <b>${coned_lastmonth}</b>.\n\n'
+sum_total = sum([nat_grid_lastmonth, coned_lastmonth, optimum_lastmonth])
+body += f'Total: <b>${sum_total}</b>\n\n'
+body += f'Split three ways: ${sum_total/3}\n\n'
 yag.send(to = [to, to2], subject = subject, contents = body)
 
