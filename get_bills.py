@@ -66,7 +66,10 @@ mfa_field.send_keys(coned_mfa_code)
 mfa_field.send_keys(Keys.RETURN)
 coned_lastmonth = float(driver.find_element_by_xpath('//*[@id="overview"]'
 	'/div[1]/div[1]/div[1]/p/b').text[1:])
+
+###
 driver.quit()
+###
 
 # Format an email:
 yag = yagmail.SMTP(mygmailusername, mygmailpassword)
